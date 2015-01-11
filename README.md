@@ -538,9 +538,170 @@ contact.save({
 #### データの削除
 
 ## <a name="4">ビュー、コントローラの実装</a>
+### Backbone.Viewとは
+#### Backbone.Viewオブジェクトの定義
+```javascript
+// ビューの定義
+var ContactView = Backbone.View.extend({
+  initialize: function() {
+    console.log('ContacViewが初期化されました。');
+  }
+});
+```
+### モデルのデータの表示
+```javascript
+// ビューの定義
+var ContactView = Backbone.View.extend({
+
+  render:function() {
+    // HTMLテンプレートを取得する
+    var template = $('#contact-template').html();
+
+    // HTMLテンプレートにモデルのデータを適用する
+    // モデルのtoJSON()メソッドを使って属性を
+    // オブジェクトの形式で書き出す
+    // var html = _.template(template,this.model.toJSON());
+    var template = $('#contact-template').html();
+    var compiled = _.template(template);
+    var html = compiled(this.model.attributes);
+
+    // 自身が保持しているDOM要素を更新する
+    this.$el.html(html);
+
+    return this;
+  }
+});                            
+
+// モデルとビューの生成
+var contact = new Contact({
+  firstName:'Alice',
+  lastName:'Henderson',
+  email:'alice@example.com'
+});
+
+// 初期化時のmodelオプションに生成したモデルの参照を渡す
+// Backbone.Viewは自動的にその定義内でその参照を
+// this.modelに保持する
+var contactView = new ContactView({
+  model:contact
+});
+
+$(function() {
+  // render()メソッドで生成したビュー自身を返すので
+  // メソッドチェーンでビューが持つメソッドを続けて
+  // 記述することができる
+  contactView.render().$el.appendTo($(document.body))
+});
+```
+### elプロパティについて
+```javascript
+// elプロパティの設定
+var ContactView = Backbone.View.extend({
+  el: '#contactView-container'
+});
+```
+#### タグ名の指定
+```javascript
+// タグ名の指定
+var Paragraph = Backbone.View.extend({
+  tagName:'p'
+});
+
+var p = new Paragraph();
+console.log(p.el.tagName);
+// => 'P'
+```
+#### 属性の指定
+```javascript
+// 属性の指定
+var ContactView = Backbone.View.extend({
+  attributes: {
+    'data-attribute':'someData',
+    'data-other-attribute':'otherData'
+  }
+});
+```
+#### クラス名の指定
+```javascript
+// クラス名の指定
+var ContactView = Backbone.View.extend({
+  className:'contact'
+});
+
+// 複数のクラス名の指定
+var ContactView = Backbone.View.extend({
+  className:'box box-contact'
+});
+```
+#### ID名の指定
+```javascript
+// ID名の指定
+var ContactView = Backbone.View.extend({
+  id: function() {
+    // 評価の戻り値がid属性の値となる
+    return 'contact-' + this.model.get('id');
+  }
+});
+```
+### DOMイベント
+```javascript
+// Todoモデルの定義
+var Todo = Backbone.Model.extend({
+  defaults: {
+    title:'',
+    completed:false
+  }
+});
+
+// TodoViewビューの定義
+var TodoView = Backbone.View.extend({
+
+  template:'<label>'+
+      '<input class="toggle" type="checkbox">'+
+      '<span><%= title %></span>'+
+      '</label>',
+
+  events: {
+    // '.toggle'セレクタで特定できる要素のクリックイベントを
+    // 監視してtoggleCompleted()メソッドを呼び出す
+    //
+    // 内部ではthis.$el.on()が実行されている
+    'click. toggle':'toggleCompleted'
+  },
+
+  render: function() {
+    var compiled = _.template(this.template);
+    var html = compiled(this.model.toJSON());
+    this.$el.html(html);
+    return this;
+  },
+  toggleCompleted: function(e) {
+    // jQueryのしくみで動いているのでは引数eは
+    // jQueryのイベントオブジェクトを参照している
+    console.log('チェックボックスがクリックされました。');
+
+    // コールバック関数のthisは現在のビューインスタンスを指す
+    console.log(this instanceof TodoView);
+    // => true
+  }
+});
+
+// モデルをDOMツリーへ挿入
+var todo = new Todo({ title:'牛乳を買う'});
+
+var todoView = new TodoView({
+  model: todo
+});
+
+$(function() {
+  todoView.render().$el.appendTo($(document.body));
+});
+```
+
 ## <a name="5">URLと処理を紐つけるルーティングの基本</a>
 # 参照
 + [JavaScriptエンジニア養成読本](http://gihyo.jp/book/2014/978-4-7741-6797-8)
++ [JavaScriptエンジニア養成読本Backbone.js特集の訂正](http://text.ykhs.org/2014/10/22/javascript_engineer_training_book_fix.html)
 + [BACKBONE.JS](http://backbonejs.org/)
 + [UNDERSCORE.JS](http://underscorejs.org/)
 + [jQuery](http://jquery.com/)

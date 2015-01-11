@@ -389,7 +389,7 @@ contactCollection.fetch().then(function(collection) {
 // 複数のモデルとコレクションによるfetch()が完了した後
 // 次の処理を行う例
 var fetchingContactCollection = contactCollection.fetch();
-var fetchingOtherData = otherData.fetch();
+var fetchingOtherData = contactCollection.fetch();
 
 $.when(fetchingContactCollection, fetchingOtherData)
     .then(function(collection,otherData){
@@ -415,10 +415,73 @@ contactCollection.create({
 var contact = contactCollection.get(1233);
 
 // save()に直接オブジェクトを渡して更新可能
-contact.save({
-  lastName:'Sanders'
-});
+//contact.save({
+//  lastName:'Sanders'
+//});
 
 // id属性を持つ、サーバ側のリソースが作成済みなので
 // そのURLへの更新のためのPUTリクエストが行われる
 // 例：PUT http://localhost:9000/contacts/123
+
+// ビューの定義
+var ContactView = Backbone.View.extend({
+  initialize: function() {
+    console.log('ContacViewが初期化されました。');
+  },
+
+  render:function() {
+    // HTMLテンプレートを取得する
+    var template = $('#contact-template').html();
+
+    // HTMLテンプレートにモデルのデータを適用する
+    // モデルのtoJSON()メソッドを使って属性を
+    // オブジェクトの形式で書き出す
+    var html = _.template(template,this.model.toJSON());
+
+    // 自身が保持しているDOM要素を更新する
+    this.$el.html(html);
+
+    return this;
+  }
+});
+// ビューの定義
+// var ContactView = Backbone.View.extend({
+
+//   render:function() {
+//     // HTMLテンプレートを取得する
+//     var template = $('#contact-template').html();
+
+//     // HTMLテンプレートにモデルのデータを適用する
+//     // モデルのtoJSON()メソッドを使って属性を
+//     // オブジェクトの形式で書き出す
+//     var html = _.template(template,this.model.toJSON());
+
+//     // 自身が保持しているDOM要素を更新する
+//     this.$el.html(html);
+
+//     return this;
+//   }
+// });                            
+
+// モデルとビューの生成
+var contact = new Contact({
+  firstName:'Alice',
+  lastName:'Henderson',
+  email:'alice@example.com'
+});
+
+// 初期化時のmodelオプションに生成したモデルの参照を渡す
+// Backbone.Viewは自動的にその定義内でその参照を
+// this.modelに保持する
+var contactView = new ContactView({
+  model:contact
+});
+//console.log(contactView);
+//console.log(JSON.stringify(contact,null,2));
+$(function() {
+  // render()メソッドで生成したビュー自身を返すので
+  // メソッドチェーンでビューが持つメソッドを続けて
+  // 記述することができる
+  console.log(contactView.render());
+//  contactView.render().$el.appendTo($(document.body))
+});  
