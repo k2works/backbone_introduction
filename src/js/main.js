@@ -563,3 +563,69 @@ var todoView = new TodoView({
 $(function() {
   todoView.render().$el.appendTo($(document.body));
 });
+
+// ルータの定義
+var Router = Backbone.Router.extend({
+  initialize: function() {
+    console.log('初期化されました。');
+  },
+
+  // 例；http://example.com/#state1
+  //     http://example.com/#state2
+  routes:{
+    'state1':'state1',
+    'state2':'state2'
+  },
+
+  // http://example.com/#state1に
+  // アクセスした場合に呼び出される
+  state1: function() {
+    console.log('state1');
+  },
+
+  // http://example.com/#state2に
+  // アクセスした場合に呼び出される
+  state2: function() {
+    console.log('state2');
+  }
+});
+
+// ルータの利用
+var router = new Router();
+
+// Backbone.historyの初期化
+Backbone.history.start();
+
+// ルーティングの例１
+var Router = Backbone.Router.extend({
+  routes:{
+    'contacts/:id':'showContact'
+  },
+
+  showContact: function(id) {
+    // contacts/123にアクセスすると
+    // 123というログが残る
+    console.log(id);
+  }
+});
+
+// ルーティングの例２
+var Router = Backbone.Router.extend({
+  routes: {
+    'contacts/:id/edit':'editContact'
+  },
+
+  editContact: function(id) {
+    //
+  }
+});
+
+// ルーティングの例３
+var Router = Backbone.Router.extend({
+  routes:{
+    '/search/:query/page:page':'showSearchResult'
+  },
+  showSearchResult: function(query,page) {
+    //
+  }
+});
