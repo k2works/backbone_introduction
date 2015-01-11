@@ -29,7 +29,7 @@ $ grunt
 ## <a name="2">モデル実装入門</a>
 ### Backbone.Modelとは
 #### Backbone.Modelオブジェクトの定義
-```bash
+```javascript
 // 連絡先を表すモデルの定義
 var Contact = Backbone.Model.extend({
   defaults: {
@@ -40,7 +40,7 @@ var Contact = Backbone.Model.extend({
 });
 ```
 
-```bash
+```javascript
 // モデルの初期化
 var contact = new Contact({
   firstName:'Alice',
@@ -51,7 +51,7 @@ var contact = new Contact({
 
 ### データ構造の確認
 #### 初期化の実装
-```bash
+```javascript
 // モデルの初期化
 var contact = new Contact({
   firstName:'Alice',
@@ -66,7 +66,7 @@ var emptyContact = new Contact();
 console.log(JSON.stringify(emptyContact,null,2));
 ```
 #### 初期化処理の実装
-```bash
+```javascript
 // 初期化処理
 var Contact = Backbone.Model.extend({
   initialize:function() {
@@ -78,7 +78,7 @@ var contact = new Contact();
 ```
 
 ### 属性値の設定と取得
-```bash
+```javascript
 // 属性値の設定
 var contact = new Contact();
 
@@ -117,7 +117,7 @@ contact.attributes.lastName;
 
 ### イベント
 #### イベントの監視
-```bash
+```javascript
 // changeイベントの監視
 var contact = new Contact({
   firstName: 'Alice',
@@ -141,7 +141,7 @@ contact.set('email','henderson@example.com');
 
 #### イベントの監視
 ##### イベントの監視の解除
-```bash
+```javascript
 // イベントの監視の解除
 contact.off();
 
@@ -170,7 +170,7 @@ contact.set('email','henderson@example.com');
 ```
 
 #### 独自のイベントの発生
-```bash
+```javascript
 // 独自のイベントの発生
 var Contact = Backbone.Model.extend({
 
@@ -199,7 +199,7 @@ contact.select();
 ```
 
 #### 他のインスタンスに対するイベントの監視
-```bash
+```javascript
 // listenTo()メソッド
 var ContactView = Backbone.View.extend({
   initialize: function() {
@@ -216,7 +216,7 @@ var ContactView = Backbone.View.extend({
 ```
 
 #### 独自処理の実装
-```bash
+```javascript
 // 独自処理の実装
 var Contact = Backbone.Model.extend({
   defaults: {
@@ -240,7 +240,7 @@ contact.fullName();
 ```
 
 #### 属性値の検証
-```bash
+```javascript
 // 独自処理の実装
 var Contact = Backbone.Model.extend({
   defaults: {
@@ -312,9 +312,233 @@ console.log(JSON.stringify(contact,null,2));
 ```
 
 ## <a name="3">複数モデル管理と永続化のしくみ</a>
+### Backbone.Collectionとは
+#### Backbone.Collectionオブジェクトの定義
+```javascript
+// 連絡先モデルのコレクションの定義
+var Contact = Backbone.Model.extend({
+  defaults: {
+    firstName:'',
+    lastName:'',
+    email:''
+  }
+});
+
+var ContactCollection = Backbone.Collection.extend({
+  // modelプロパティにどのモデルを管理するかを宣言する
+  // この宣言によって、コレクションが保持するモデルは
+  // Contactのインスタンスとなる
+
+  model: Contact,
+
+  // initialize()メソッドを定義できる点はBackbone.Modelと同じ
+  initialize: function() {
+    console.log('ContactCollectionが初期化されました。');
+  }
+});
+```
+### モデルの追加
+```javascript
+// モデルの追加方法１
+var contactCollection = new ContactCollection();
+
+var alice = new Contact({
+  firstName:'Alice',
+  lastName:'Henderson',
+  email:'alice@example.com'
+});
+
+var bob = new Contact({
+  firstName:'Bob',
+  lastName:'Sanders',
+  email:'bob@example.com'
+});
+
+contactCollection.add(alice);
+contactCollection.add(bob);
+
+console.log(JSON.stringify(contactCollection,null,2));
+console.log(contactCollection.length);
+contactCollection.add([alice,bob]);
+
+// 同じモデルを追加した場合
+var contactCollection = new ContactCollection();
+contactCollection.add(alice);
+contactCollection.add(alice);
+
+console.log(contactCollection.length);
+// => 1
+
+// モデルの追加方法２
+contactCollection.add({
+  firstName:'Alice',
+  lastName:'Henderson',
+  email:'alice@example.com'
+});
+
+// モデルの一括追加
+contactCollection.add([
+  {
+    firstName:'Alice',
+    lastName:'Henderson',
+    email:'alice@example.com'
+  },{
+    firstName:'Bob',
+    lastName:'Sanders',
+    email:'bob@example.com'
+  }
+]);
+
+// モデルの一括追加
+contactCollection.add([
+  {
+    firstName:'Alice',
+    lastName:'Henderson',
+    email:'alice@example.com'
+  },{
+    firstName:'Bob',
+    lastName:'Sanders',
+    email:'bob@example.com'
+  }
+]);
+
+var contactCollection = new ContactCollection([alice,bob]);
+```
+#### モデルの削除
+```javascript
+// モデルの削除
+// コレクションからaliceモデルを削除
+contactCollection.remove(alice);
+console.log(JSON.stringify(contactCollection,null,2));
+```
+#### モデルのリセット
+```javascript
+// モデルのリセット
+var john = new Contact({
+  firstName:'John',
+  lastName:'Doe',
+  email:'john@example.com'
+});
+
+var jane = new Contact({
+  firstName:'Jane',
+  lastName:'Doe',
+  email:'jane@example.com'
+});
+
+contactCollection.reset([john,jane]);
+
+console.log(JSON.stringify(contactCollection,null,2));
+```
+### イベント
+```javascript
+// addイベントの監視
+contactCollection.on('add',function(contact) {
+  // コールバック関数の引数から追加されたモデルを参照できる
+  console.log('モデルが追加されました。',
+  contact.get('firstName'));
+});
+
+//
+contactCollection.add([
+  {
+    firstName:'John',
+    lastName:'Smith',
+    email:'johnesmith@example.com'
+  },{
+    firstName:'Jane',
+    lastName:'Smith',
+    email:'janesmith@example.com'
+  }
+]);
+```
+### Underscore.jsの機能
+```javascript
+// Unserscore.jsのメソッドの呼び出し
+contactCollection.each(function(contact) {
+  //
+});
+
+// filter()メソッド
+var filtered = contactCollection.filter(function(contact) {
+  // Contactモデルがage(年齢)属性を持っていたとして
+  // その年齢が３０以上のモデルだけを抽出した配列を返す
+  return contact.get('age') >= 30;
+});
+```
+### データの永続化
+#### データの取得
+```javascript
+// urlプロパティの定義
+var ContactCollection = Backbone.Collection.extend({
+  url:'/contacts',
+  model:Contact
+});
+
+// fetch()メソッドによるデータの取得
+var contactCollection = new ContactCollection();
+contactCollection.fetch();
+
+// コールバック関数の指定１
+// successオプションにコールバック関数を渡して
+// コレクションのfetch()が完了後に次の処理を行う例
+contactCollection.fetch({
+  success:function(collection) {
+    showContact(Collection);
+  }
+});
+
+// コールバック関数の指定２
+// jQuery Deferredが返すPromiseオブジェクトを利用して
+// コレクションのfetch()が完了後に次の処理を行う例
+contactCollection.fetch().then(function(collection) {
+  showContact(Collection);
+});
+  
+// コールバック関数の指定３
+// 複数のモデルとコレクションによるfetch()が完了した後
+// 次の処理を行う例
+var fetchingContactCollection = contactCollection.fetch();
+var fetchingOtherData = otherData.fetch();
+
+$.when(fetchingContactCollection, fetchingOtherData)
+    .then(function(collection,otherData){
+      //
+    });
+```
+#### データの保存
+```javascript
+// リソースの新規作成(POSTリクエスト)
+var ContactCollection = Backbone.Collection.extend({
+  url:'/contacts',
+  model: Contact
+});
+
+contactCollection.create({
+  firstName:'Alice',
+  lastName:'Henderson',
+  email:'alice@example.com'
+});
+// クライアント側で新しいデータが作られた
+// (idをまだ持たない）のでPOSTリクエストになる
+// 例：POST http://localhost:9000/contacts
+
+// リソースの更新(PUTリクエスト)
+var contact = contactCollection.get(1233);
+
+// save()に直接オブジェクトを渡して更新可能
+contact.save({
+  lastName:'Sanders'
+});
+
+// id属性を持つ、サーバ側のリソースが作成済みなので
+// そのURLへの更新のためのPUTリクエストが行われる
+// 例：PUT http://localhost:9000/contacts/123
+```
+#### データの削除
+
 ## <a name="4">ビュー、コントローラの実装</a>
 ## <a name="5">URLと処理を紐つけるルーティングの基本</a>
-
 # 参照
 + [JavaScriptエンジニア養成読本](http://gihyo.jp/book/2014/978-4-7741-6797-8)
 + [BACKBONE.JS](http://backbonejs.org/)
