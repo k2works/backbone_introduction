@@ -217,3 +217,4 @@ contact.set({
 
 // モデルの属性が変化していないことを確認できる
 console.log(JSON.stringify(contact,null,2));
+
